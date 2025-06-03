@@ -46,15 +46,34 @@ class Rotas
             $endpoint = $this->endpoints[$rota];
             $dados = $endpoint->executar();
 
-            // Monta a resposta genérica
             $retorno = new Retorno();
-            if ($dados === false) {
+
+            $metodo = $_SERVER['REQUEST_METHOD'];
+
+            if ($dados === false || $dados === null) {
                 $retorno->erro = true;
-                $retorno->mensagem = "Parâmetros obrigatórios faltando ou inválidos.";
+                $retorno->mensagem = match ($metodo) {
+                    "POST" => "Erro ao criar o registro. Verifique os dados enviados.",
+                    "PUT" => "Erro ao atualizar o registro. Verifique se o ID e os dados são válidos.",
+                    "DELETE" => "Erro ao excluir o registro. Verifique se o ID é válido.",
+                    "GET" => "Nenhum dado encontrado para os parâmetros informados.",
+                    default => "Erro na requisição."
+                };
             } else {
+                // Sucesso
                 $retorno->erro = false;
                 $retorno->dados = $dados;
+                $retorno->mensagem = match ($metodo) {
+                    "POST" => "Registro criado com sucesso.",
+                    "PUT" => "Registro atualizado com sucesso.",
+                    "DELETE" => "Registro excluído com sucesso.",
+                    "GET" => is_array($dados) && count($dados) === 0
+                    ? "Nenhum dado encontrado."
+                    : "Consulta realizada com sucesso.",
+                    default => "Operação realizada com sucesso."
+                };
             }
+
             return $retorno;
         }
 
