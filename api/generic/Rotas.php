@@ -36,11 +36,7 @@ class Rotas
             "votos" => new Acao([
                 Acao::GET => new Endpoint("Voto", "listarTodos"),
                 Acao::POST => new Endpoint("Voto", "inserir")
-            ]),
-
-            "votos/buscarVotos" => new Acao([
-                Acao::GET => new Endpoint("Voto", "listarPorMemeId")
-            ]),
+            ])
         ];
     }
 
