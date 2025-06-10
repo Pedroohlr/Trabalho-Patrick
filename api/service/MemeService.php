@@ -33,10 +33,6 @@ class MemeService
 
         $novoId = $this->dao->inserir($titulo, $imagem_url, $legenda, $autor);
 
-        if (!empty($tags)) {
-            $this->dao->recriarTags($novoId, $tags);
-        }
-
         return $this->dao->buscarPorId($novoId);
     }
 
@@ -56,10 +52,6 @@ class MemeService
         $sucesso = $this->dao->atualizar($id, $titulo, $imagem_url, $legenda, $autor);
         if (!$sucesso) {
             return null;
-        }
-
-        if (is_array($tags)) {
-            $this->dao->recriarTags($id, $tags);
         }
 
         return $this->dao->buscarPorId($id);

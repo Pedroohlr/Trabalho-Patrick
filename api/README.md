@@ -1,6 +1,6 @@
 # 📡 API REST - Curadoria de Memes
 
-Esta é uma API RESTful desenvolvida em PHP seguindo o padrão MVC. Ela permite gerenciar memes, tags e votos de forma simples e estruturada. Ideal para ser consumida por aplicações front-end como React, Postman, ou outras ferramentas via HTTP.
+Esta é uma API RESTful desenvolvida em PHP seguindo o padrão MVC, com sistema de autenticação JWT para efetuar requisições. Ela permite gerenciar memes, tags e votos de forma simples e estruturada. A API possui endpoint para o cadastro de usuários em seu banco de dados, tais usuários são utilizados para realizar a autenticação na API.
 
 ---
 
@@ -36,6 +36,15 @@ Esta é uma API RESTful desenvolvida em PHP seguindo o padrão MVC. Ela permite 
 |---------|-------------------|------------------------------------------------------------------------|
 | GET     | `/api/votos`      | Lista todos os votos registrados. Pode usar `?meme_id=ID` como filtro. |
 | POST    | `/api/votos`      | Cria um novo voto. Requer `meme_id` e `tipo` ("like" ou "dislike") no corpo.|
+
+---
+
+### 🎼 USUÁRIOS E AUTENTICAÇÃO
+
+| Método  | Endpoint                      | Descrição                                                  |
+|---------|-------------------------------|------------------------------------------------------------|
+| POST    | `/api/usuario/registrar`      | Cria um novo usuário. Requer nome, email e senha no corpo. |
+| POST    | `/api/auth/login`             | Gera token JWT baseado no e-mail e senha inseridos no corpo da requisição.|
 
 ---
 
@@ -140,3 +149,34 @@ Ou via JSON:
 
 Filtrar por meme:
 `GET /api/votos?meme_id=3`
+
+---
+
+### 🔹 USUÁRIOS E AUTENTICAÇÃO
+
+#### ➕ Registrar Usuário
+`POST /api/usuario/registrar`
+```json
+{
+  "nome": "João da Silva",
+  "email": "joao@exemplo.com",
+  "senha": "123456"
+}
+```
+
+#### 🔐 AUTENTICAÇÂO NA API
+`POST /api/auth/login`
+```json
+{
+  "email": "joao@exemplo.com",
+  "senha": "123456"
+}
+```
+
+Resposta esperada:
+```json
+{
+  "erro": false,
+  "token": "eyJ0eXAiOiJKV1QiLCJhbGci..."
+}
+```

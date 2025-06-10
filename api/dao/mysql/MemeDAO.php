@@ -164,18 +164,4 @@ class MemeDAO extends MysqlFactory
         $rowCount = $this->banco->executar($sql, [':id' => $id]);
         return ($rowCount > 0);
     }
-
-    public function recriarTags(int $meme_id, array $novasTagIds): void
-    {
-        $sqlDelete = "DELETE FROM meme_tag WHERE meme_id = :meme_id";
-        $this->banco->executar($sqlDelete, [':meme_id' => $meme_id]);
-
-        $sqlInsert = "INSERT INTO meme_tag (meme_id, tag_id) VALUES (:meme_id, :tag_id)";
-        foreach ($novasTagIds as $tag_id) {
-            $this->banco->executar($sqlInsert, [
-                ':meme_id' => $meme_id,
-                ':tag_id' => $tag_id
-            ]);
-        }
-    }
 }

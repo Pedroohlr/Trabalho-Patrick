@@ -2,6 +2,8 @@
 
 namespace generic;
 
+use generic\Retorno;
+
 class Rotas
 {
     private array $endpoints = [];
@@ -11,11 +13,18 @@ class Rotas
 
 
         $this->endpoints = [
+            "usuario/registrar" => new Acao([
+                Acao::POST => new Endpoint("Usuario", "inserir")
+            ]),
+            "auth/login" => new Acao([
+                Acao::POST => new Endpoint("Auth", "login")
+            ]),
+
             "memes" => new Acao([
-                Acao::GET => new Endpoint("Meme", "listarTodos"),      // listar todos
-                Acao::POST => new Endpoint("Meme", "inserir"),     // criar meme
-                Acao::PUT => new Endpoint("Meme", "atualizar"),   // atualizar meme
-                Acao::DELETE => new Endpoint("Meme", "deletar")      // deletar meme
+                Acao::GET => new Endpoint("Meme", "listarTodos"),
+                Acao::POST => new Endpoint("Meme", "inserir"),
+                Acao::PUT => new Endpoint("Meme", "atualizar"),
+                Acao::DELETE => new Endpoint("Meme", "deletar")
             ]),
 
             "memes/buscar/id" => new Acao([
@@ -27,10 +36,10 @@ class Rotas
             ]),
 
             "tags" => new Acao([
-                Acao::GET => new Endpoint("Tag", "listar"), // listar todas as tags
-                Acao::POST => new Endpoint("Tag", "inserir"), // criar tag
-                Acao::PUT => new Endpoint("Tag", "atualizar"), // atualizar tag
-                Acao::DELETE => new Endpoint("Tag", "deletar") // deletar tag
+                Acao::GET => new Endpoint("Tag", "listar"),
+                Acao::POST => new Endpoint("Tag", "inserir"),
+                Acao::PUT => new Endpoint("Tag", "atualizar"),
+                Acao::DELETE => new Endpoint("Tag", "deletar")
             ]),
 
             "votos" => new Acao([
@@ -42,41 +51,41 @@ class Rotas
 
     public function executar(string $rota)
     {
-        if (isset($this->endpoints[$rota])) {
-            $endpoint = $this->endpoints[$rota];
-            $dados = $endpoint->executar();
+        try {
+            if (isset($this->endpoints[$rota])) {
+                $endpoint = $this->endpoints[$rota];
+                $dados = $endpoint->executar();
 
-            $retorno = new Retorno();
+                $retorno = new Retorno();
 
-            $metodo = $_SERVER['REQUEST_METHOD'];
+                if ($dados === false) {
+                    $retorno->erro = true;
+                    $retorno->mensagem = "Parâmetros obrigatórios faltando ou inválidos.";
+                } elseif ($dados === null) {
+                    http_response_code(405);
+                    return [
+                        "erro" => true,
+                        "mensagem" => "Método HTTP '{$_SERVER['REQUEST_METHOD']}' não permitido para a rota '{$rota}'."
+                    ];
+                } else {
+                    $retorno->erro = false;
+                    $retorno->dados = $dados;
+                }
 
-            if ($dados === false || $dados === null) {
-                $retorno->erro = true;
-                $retorno->mensagem = match ($metodo) {
-                    "POST" => "Erro ao criar o registro. Verifique os dados enviados.",
-                    "PUT" => "Erro ao atualizar o registro. Verifique se o ID e os dados são válidos.",
-                    "DELETE" => "Erro ao excluir o registro. Verifique se o ID é válido.",
-                    "GET" => "Nenhum dado encontrado para os parâmetros informados.",
-                    default => "Erro na requisição."
-                };
-            } else {
-                // Sucesso
-                $retorno->erro = false;
-                $retorno->dados = $dados;
-                $retorno->mensagem = match ($metodo) {
-                    "POST" => "Registro criado com sucesso.",
-                    "PUT" => "Registro atualizado com sucesso.",
-                    "DELETE" => "Registro excluído com sucesso.",
-                    "GET" => is_array($dados) && count($dados) === 0
-                    ? "Nenhum dado encontrado."
-                    : "Consulta realizada com sucesso.",
-                    default => "Operação realizada com sucesso."
-                };
+                return $retorno;
             }
 
-            return $retorno;
+            http_response_code(404);
+            return [
+                "erro" => true,
+                "mensagem" => "Rota '{$rota}' não encontrada."
+            ];
+        } catch (\Throwable $e) {
+            http_response_code(500);
+            return [
+                "erro" => true,
+                "mensagem" => "Erro interno durante a execução da rota.",
+            ];
         }
-
-        return null;
     }
 }
